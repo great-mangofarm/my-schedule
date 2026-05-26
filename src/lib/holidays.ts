@@ -2,29 +2,20 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
 const CACHE_PREFIX = 'holidays_';
-const CACHE_TTL = 24 * 60 * 60 * 1000;
 
 let holidayCache: Record<string, string> = {};
 let initialized = false;
 
-interface CachedData {
-  data: Record<string, string>;
-  ts: number;
-}
-
 async function fetchFromFirestore(year: number): Promise<Record<string, string>> {
   const cacheKey = `${CACHE_PREFIX}${year}`;
-  const raw = localStorage.getItem(cacheKey);
-  if (raw) {
-    const cached: CachedData = JSON.parse(raw);
-    if (Date.now() - cached.ts < CACHE_TTL) return cached.data;
-  }
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) return JSON.parse(cached) as Record<string, string>;
 
   const snap = await getDoc(doc(db, 'holidays', String(year)));
   if (!snap.exists()) return {};
 
   const data = (snap.data().dates ?? {}) as Record<string, string>;
-  localStorage.setItem(cacheKey, JSON.stringify({ data, ts: Date.now() } satisfies CachedData));
+  localStorage.setItem(cacheKey, JSON.stringify(data));
   return data;
 }
 
@@ -53,4 +44,23 @@ export function isHoliday(dateStr: string): boolean {
 
 export function getHolidayName(dateStr: string): string | null {
   return holidayCache[dateStr] ?? null;
+}
+
+export function getHolidayEvents() {
+  return Object.entries(holidayCache).map(([date, title]) => ({
+    title,
+    start: date,
+    allDay: true,
+    display: 'background' as const,
+    classNames: ['fc-holiday'],
+    extendedProps: { isHoliday: true },
+  }));
+}
+
+export function clearHolidayCache() {
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith(CACHE_PREFIX))
+    .forEach((k) => localStorage.removeItem(k));
+  initialized = false;
+  holidayCache = {};
 }
