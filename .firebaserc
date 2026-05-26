@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "my-schedule"
+  },
+  "targets": {
+    "my-schedule": {
+      "hosting": {
+        "my-schedule": ["my-schedule"]
+      }
+    }
+  }
+}
