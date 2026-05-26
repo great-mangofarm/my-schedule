@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -9,7 +9,7 @@ import AppLayout from '../../components/layout/AppLayout';
 import EventModal from '../../components/EventModal';
 import { useEvents, useCheckIns } from '../../hooks/useEvents';
 import type { ScheduleEvent } from '../../types/schedule';
-import { getHolidayEvents, isHoliday, getHolidayName } from '../../lib/holidays';
+import { getHolidayEvents, isHoliday, getHolidayName, initHolidays } from '../../lib/holidays';
 import '../../styles/calendars.css';
 
 const DAY_CHECKERS = [isSunday, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday];
@@ -42,8 +42,13 @@ export default function CalendarPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>();
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
+  const [, setHolidaysReady] = useState(false);
   const { events, addEvent, deleteEvent } = useEvents();
   const { checkIns, toggleCheckIn } = useCheckIns();
+
+  useEffect(() => {
+    initHolidays().then(() => setHolidaysReady(true));
+  }, []);
 
   const buildFcEvents = (): EventInput[] => {
     const result: EventInput[] = [];

@@ -1,68 +1,108 @@
-// 한국 공휴일 (2025~2027)
-const HOLIDAYS: Record<string, string> = {
-  // 2025
-  '2025-01-01': '신정',
-  '2025-01-28': '설날 연휴',
-  '2025-01-29': '설날',
-  '2025-01-30': '설날 연휴',
-  '2025-01-31': '대체공휴일',
-  '2025-03-01': '삼일절',
-  '2025-05-05': '어린이날',
-  '2025-05-06': '대체공휴일',
-  '2025-06-06': '현충일',
-  '2025-08-15': '광복절',
-  '2025-10-03': '개천절',
-  '2025-10-05': '추석 연휴',
-  '2025-10-06': '추석',
-  '2025-10-07': '추석 연휴',
-  '2025-10-08': '대체공휴일',
-  '2025-10-09': '한글날',
-  '2025-12-25': '크리스마스',
+const API_KEY = import.meta.env.VITE_HOLIDAY_API_KEY;
+const ENDPOINT = 'https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getHoliDeInfo';
+const CACHE_PREFIX = 'holidays_';
 
-  // 2026
-  '2026-01-01': '신정',
-  '2026-02-16': '설날 연휴',
-  '2026-02-17': '설날',
-  '2026-02-18': '설날 연휴',
-  '2026-03-01': '삼일절',
-  '2026-05-05': '어린이날',
-  '2026-05-24': '부처님오신날',
-  '2026-06-06': '현충일',
-  '2026-08-15': '광복절',
-  '2026-09-24': '추석 연휴',
-  '2026-09-25': '추석',
-  '2026-09-26': '추석 연휴',
-  '2026-10-03': '개천절',
-  '2026-10-09': '한글날',
-  '2026-12-25': '크리스마스',
-  '2026-06-03': '지방선거일',
+interface HolidayItem {
+  dateKind: string;
+  dateName: string;
+  isHoliday: string;
+  locdate: number;
+  seq: number;
+}
 
-  // 2027
-  '2027-01-01': '신정',
-  '2027-02-06': '설날 연휴',
-  '2027-02-07': '설날',
-  '2027-02-08': '설날 연휴',
-  '2027-03-01': '삼일절',
-  '2027-05-05': '어린이날',
-  '2027-05-13': '부처님오신날',
-  '2027-06-06': '현충일',
-  '2027-08-15': '광복절',
-  '2027-10-03': '개천절',
-  '2027-10-09': '한글날',
-  '2027-10-14': '추석 연휴',
-  '2027-10-15': '추석',
-  '2027-10-16': '추석 연휴',
-  '2027-12-25': '크리스마스',
-};
+async function fetchHolidaysFromApi(year: number): Promise<Record<string, string>> {
+  const result: Record<string, string> = {};
 
-export const isHoliday = (dateStr: string) => dateStr in HOLIDAYS;
-export const getHolidayName = (dateStr: string) => HOLIDAYS[dateStr] ?? null;
-export const getHolidayEvents = () =>
-  Object.entries(HOLIDAYS).map(([date, title]) => ({
+  for (let month = 1; month <= 12; month++) {
+    const params = new URLSearchParams({
+      ServiceKey: API_KEY,
+      solYear: String(year),
+      solMonth: String(month).padStart(2, '0'),
+      _type: 'json',
+      numOfRows: '20',
+    });
+
+    try {
+      const res = await fetch(`${ENDPOINT}?${params}`);
+      const json = await res.json();
+      const items = json?.response?.body?.items?.item;
+      if (!items) continue;
+
+      const list: HolidayItem[] = Array.isArray(items) ? items : [items];
+      for (const item of list) {
+        if (item.isHoliday === 'Y') {
+          const d = String(item.locdate);
+          const dateStr = `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
+          result[dateStr] = item.dateName;
+        }
+      }
+    } catch {
+      // 월별 실패 시 스킵
+    }
+  }
+
+  return result;
+}
+
+async function getHolidaysForYear(year: number): Promise<Record<string, string>> {
+  const cacheKey = `${CACHE_PREFIX}${year}`;
+  const cached = localStorage.getItem(cacheKey);
+
+  if (cached) {
+    return JSON.parse(cached) as Record<string, string>;
+  }
+
+  const data = await fetchHolidaysFromApi(year);
+  localStorage.setItem(cacheKey, JSON.stringify(data));
+  return data;
+}
+
+// 캐시된 데이터 (메모리)
+let holidayCache: Record<string, string> = {};
+let initialized = false;
+
+export async function initHolidays(): Promise<void> {
+  if (initialized) return;
+  const now = new Date();
+  const thisYear = now.getFullYear();
+  const nextYear = thisYear + 1;
+
+  const [cur, next] = await Promise.all([
+    getHolidaysForYear(thisYear),
+    getHolidaysForYear(nextYear),
+  ]);
+
+  holidayCache = { ...cur, ...next };
+  initialized = true;
+}
+
+export function isHoliday(dateStr: string): boolean {
+  return dateStr in holidayCache;
+}
+
+export function getHolidayName(dateStr: string): string | null {
+  return holidayCache[dateStr] ?? null;
+}
+
+export function getHolidayEvents() {
+  return Object.entries(holidayCache).map(([date, title]) => ({
     title,
     start: date,
     allDay: true,
-    display: 'background',
+    display: 'background' as const,
     classNames: ['fc-holiday'],
     extendedProps: { isHoliday: true },
   }));
+}
+
+export function clearHolidayCache(year?: number) {
+  if (year) {
+    localStorage.removeItem(`${CACHE_PREFIX}${year}`);
+  } else {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith(CACHE_PREFIX))
+      .forEach((k) => localStorage.removeItem(k));
+  }
+  initialized = false;
+  holidayCache = {};
+}
