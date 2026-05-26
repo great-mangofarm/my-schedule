@@ -1,65 +1,23 @@
-const API_KEY = import.meta.env.VITE_HOLIDAY_API_KEY;
-const ENDPOINT = 'https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getHoliDeInfo';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from './firebase';
+
 const CACHE_PREFIX = 'holidays_';
 
-interface HolidayItem {
-  dateKind: string;
-  dateName: string;
-  isHoliday: string;
-  locdate: number;
-  seq: number;
-}
+let holidayCache: Record<string, string> = {};
+let initialized = false;
 
-async function fetchHolidaysFromApi(year: number): Promise<Record<string, string>> {
-  const result: Record<string, string> = {};
-
-  for (let month = 1; month <= 12; month++) {
-    const params = new URLSearchParams({
-      ServiceKey: API_KEY,
-      solYear: String(year),
-      solMonth: String(month).padStart(2, '0'),
-      _type: 'json',
-      numOfRows: '20',
-    });
-
-    try {
-      const res = await fetch(`${ENDPOINT}?${params}`);
-      const json = await res.json();
-      const items = json?.response?.body?.items?.item;
-      if (!items) continue;
-
-      const list: HolidayItem[] = Array.isArray(items) ? items : [items];
-      for (const item of list) {
-        if (item.isHoliday === 'Y') {
-          const d = String(item.locdate);
-          const dateStr = `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
-          result[dateStr] = item.dateName;
-        }
-      }
-    } catch {
-      // 월별 실패 시 스킵
-    }
-  }
-
-  return result;
-}
-
-async function getHolidaysForYear(year: number): Promise<Record<string, string>> {
+async function fetchFromFirestore(year: number): Promise<Record<string, string>> {
   const cacheKey = `${CACHE_PREFIX}${year}`;
   const cached = localStorage.getItem(cacheKey);
+  if (cached) return JSON.parse(cached) as Record<string, string>;
 
-  if (cached) {
-    return JSON.parse(cached) as Record<string, string>;
-  }
+  const snap = await getDoc(doc(db, 'holidays', String(year)));
+  if (!snap.exists()) return {};
 
-  const data = await fetchHolidaysFromApi(year);
+  const data = (snap.data().dates ?? {}) as Record<string, string>;
   localStorage.setItem(cacheKey, JSON.stringify(data));
   return data;
 }
-
-// 캐시된 데이터 (메모리)
-let holidayCache: Record<string, string> = {};
-let initialized = false;
 
 export async function initHolidays(): Promise<void> {
   if (initialized) return;
@@ -67,12 +25,16 @@ export async function initHolidays(): Promise<void> {
   const thisYear = now.getFullYear();
   const nextYear = thisYear + 1;
 
-  const [cur, next] = await Promise.all([
-    getHolidaysForYear(thisYear),
-    getHolidaysForYear(nextYear),
-  ]);
+  try {
+    const [cur, next] = await Promise.all([
+      fetchFromFirestore(thisYear),
+      fetchFromFirestore(nextYear),
+    ]);
+    holidayCache = { ...cur, ...next };
+  } catch {
+    // Firestore 읽기 실패 시 빈 캐시로 진행
+  }
 
-  holidayCache = { ...cur, ...next };
   initialized = true;
 }
 
@@ -95,14 +57,10 @@ export function getHolidayEvents() {
   }));
 }
 
-export function clearHolidayCache(year?: number) {
-  if (year) {
-    localStorage.removeItem(`${CACHE_PREFIX}${year}`);
-  } else {
-    Object.keys(localStorage)
-      .filter((k) => k.startsWith(CACHE_PREFIX))
-      .forEach((k) => localStorage.removeItem(k));
-  }
+export function clearHolidayCache() {
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith(CACHE_PREFIX))
+    .forEach((k) => localStorage.removeItem(k));
   initialized = false;
   holidayCache = {};
 }

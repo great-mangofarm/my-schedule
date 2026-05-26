@@ -52,8 +52,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 }`
               }
             >
-              <span className="h-5 w-5 shrink-0">{icon}</span>
-              {!collapsed && <span>{label}</span>}
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center">{icon}</span>
+              {!collapsed && <span className="leading-none">{label}</span>}
             </NavLink>
           ))}
         </nav>
@@ -67,10 +67,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
             onClick={signOutUser}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
           >
-            <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            {!collapsed && <span>로그아웃</span>}
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </span>
+            {!collapsed && <span className="leading-none">로그아웃</span>}
           </button>
         </div>
       </aside>
