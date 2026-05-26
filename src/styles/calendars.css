@@ -115,7 +115,7 @@
 }
 
 .fc-addEventButton-button.fc-button-primary {
-  background-color: #3758f9;
+  background-color: #19d4a9;
   height: 44px;
   border: transparent;
   padding: 10px 16px;
@@ -136,7 +136,7 @@
 .fc .fc-button-primary:not(:disabled):active,
 .fc .fc-button-primary:not(:disabled):focus {
   box-shadow: none !important;
-  border-color: #3758f9;
+  border-color: #19d4a9;
 }
 
 .fc
@@ -242,7 +242,7 @@
 
 /* Palette classes for calendar event backgrounds (used by calendar-1.tsx) */
 .fc-bg-primary {
-  background-color: #eff3ff !important; /* user color */
+  background-color: #edfdf8 !important; /* user color */
   color: #1f2937 !important;
 }
 .fc-bg-warning {
@@ -282,7 +282,7 @@
   background-color: #ef4444 !important;
 }
 .event-fc-color.fc-bg-primary .fc-daygrid-event-dot {
-  background-color: #3758f9 !important;
+  background-color: #19d4a9 !important;
 }
 .event-fc-color.fc-bg-warning .fc-daygrid-event-dot {
   background-color: #f97316 !important;
