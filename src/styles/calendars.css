@@ -359,11 +359,6 @@
   color: #ef4444 !important;
 }
 
-/* 공휴일 이름: 옅은 빨간색 */
-.fc-day-holiday .fc-holiday-name {
-  color: #f87171 !important;
-}
-
 /* 토요일: 파란색 숫자 */
 .fc-day-saturday .fc-daygrid-day-number {
   color: #3b82f6 !important;
@@ -372,10 +367,13 @@
 /* 공휴일 이름 텍스트 */
 .fc-holiday-name {
   font-size: 10px;
-  color: #ef4444;
-  line-height: 1.2;
-  padding: 0 10px 4px;
+  color: #f87171;
+  line-height: 1;
+  padding: 0 10px;
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 날짜 셀 hover + pointer */
