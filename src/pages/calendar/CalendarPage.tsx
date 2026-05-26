@@ -3,12 +3,13 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import type { EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/core';
+import type { EventInput, DateSelectArg, EventClickArg, DayCellContentArg } from '@fullcalendar/core';
 import { format, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday } from 'date-fns';
 import AppLayout from '../../components/layout/AppLayout';
 import EventModal from '../../components/EventModal';
 import { useEvents, useCheckIns } from '../../hooks/useEvents';
 import type { ScheduleEvent } from '../../types/schedule';
+import { getHolidayEvents, isHoliday } from '../../lib/holidays';
 import '../../styles/calendars.css';
 
 const DAY_CHECKERS = [isSunday, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday];
@@ -80,7 +81,16 @@ export default function CalendarPage() {
         });
       }
     }
+    result.push(...getHolidayEvents());
     return result;
+  };
+
+  const getDayCellClass = (arg: DayCellContentArg) => {
+    const dateStr = format(arg.date, 'yyyy-MM-dd');
+    const day = arg.date.getDay();
+    if (isHoliday(dateStr) || day === 0) return ['fc-day-holiday'];
+    if (day === 6) return ['fc-day-saturday'];
+    return [];
   };
 
   const handleEventClick = (info: EventClickArg) => {
@@ -120,6 +130,7 @@ export default function CalendarPage() {
               },
             }}
             events={buildFcEvents()}
+            dayCellClassNames={getDayCellClass}
             selectable
             selectMirror
             select={handleDateSelect}

@@ -353,3 +353,22 @@
 .fc-multimonth .fc-col-header-cell {
   background: none !important;
 }
+
+/* 공휴일/일요일: 빨간색 */
+.fc-day-holiday .fc-daygrid-day-number {
+  color: #ef4444 !important;
+  font-weight: 600;
+}
+.fc-day-holiday {
+  background-color: #fff5f5 !important;
+}
+
+/* 토요일: 파란색 */
+.fc-day-saturday .fc-daygrid-day-number {
+  color: #3b82f6 !important;
+}
+
+/* 공휴일 배경 이벤트 숨김 (색상으로만 표시) */
+.fc-holiday {
+  display: none !important;
+}
