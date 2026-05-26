@@ -1,11 +1,11 @@
 {
   "projects": {
-    "default": "my-schedule"
+    "default": "my-schedule-6d1ca"
   },
   "targets": {
-    "my-schedule": {
+    "my-schedule-6d1ca": {
       "hosting": {
-        "my-schedule": ["my-schedule"]
+        "my-schedule-6d1ca": ["my-schedule-6d1ca"]
       }
     }
   }
