@@ -354,21 +354,31 @@
   background: none !important;
 }
 
-/* 공휴일/일요일: 빨간색 */
+/* 공휴일/일요일: 빨간색 숫자 */
 .fc-day-holiday .fc-daygrid-day-number {
   color: #ef4444 !important;
   font-weight: 600;
 }
-.fc-day-holiday {
-  background-color: #fff5f5 !important;
-}
 
-/* 토요일: 파란색 */
+/* 토요일: 파란색 숫자 */
 .fc-day-saturday .fc-daygrid-day-number {
   color: #3b82f6 !important;
 }
 
-/* 공휴일 배경 이벤트 숨김 (색상으로만 표시) */
-.fc-holiday {
-  display: none !important;
+/* 공휴일 이름 텍스트 */
+.fc-holiday-name {
+  font-size: 10px;
+  color: #ef4444;
+  line-height: 1.2;
+  padding: 0 10px 4px;
+  display: block;
+}
+
+/* 날짜 셀 hover + pointer */
+.fc-daygrid-day {
+  cursor: pointer !important;
+}
+.fc-daygrid-day:hover {
+  background-color: #f9fafb !important;
+  transition: background-color 0.15s;
 }

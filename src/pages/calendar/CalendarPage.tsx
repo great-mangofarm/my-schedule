@@ -9,7 +9,7 @@ import AppLayout from '../../components/layout/AppLayout';
 import EventModal from '../../components/EventModal';
 import { useEvents, useCheckIns } from '../../hooks/useEvents';
 import type { ScheduleEvent } from '../../types/schedule';
-import { getHolidayEvents, isHoliday } from '../../lib/holidays';
+import { getHolidayEvents, isHoliday, getHolidayName } from '../../lib/holidays';
 import '../../styles/calendars.css';
 
 const DAY_CHECKERS = [isSunday, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday];
@@ -93,6 +93,17 @@ export default function CalendarPage() {
     return [];
   };
 
+  const renderDayCellContent = (arg: DayCellContentArg) => {
+    const dateStr = format(arg.date, 'yyyy-MM-dd');
+    const holidayName = getHolidayName(dateStr);
+    return (
+      <>
+        <span className="fc-daygrid-day-number">{arg.dayNumberText}</span>
+        {holidayName && <span className="fc-holiday-name">{holidayName}</span>}
+      </>
+    );
+  };
+
   const handleEventClick = (info: EventClickArg) => {
     const { eventId, date, type } = info.event.extendedProps;
     if (type === 'recurring') {
@@ -131,6 +142,7 @@ export default function CalendarPage() {
             }}
             events={buildFcEvents()}
             dayCellClassNames={getDayCellClass}
+            dayCellContent={renderDayCellContent}
             selectable
             selectMirror
             select={handleDateSelect}
