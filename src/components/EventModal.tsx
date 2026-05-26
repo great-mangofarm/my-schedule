@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ScheduleEvent, EventType, RepeatPattern } from '../types/schedule';
 
 interface EventModalProps {
@@ -26,6 +26,12 @@ export default function EventModal({ open, onClose, onSave, initialDate, editEve
   const [hasAlarm, setHasAlarm] = useState(editEvent?.hasAlarm ?? false);
   const [repeatPattern, setRepeatPattern] = useState<RepeatPattern>(editEvent?.repeatPattern ?? 'daily');
   const [repeatDays, setRepeatDays] = useState<number[]>(editEvent?.repeatDays ?? []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    if (open) window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [open, onClose]);
 
   if (!open) return null;
 
