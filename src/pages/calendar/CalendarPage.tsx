@@ -9,7 +9,7 @@ import AppLayout from '../../components/layout/AppLayout';
 import EventModal from '../../components/EventModal';
 import { useEvents, useCheckIns } from '../../hooks/useEvents';
 import type { ScheduleEvent } from '../../types/schedule';
-import { getHolidayEvents, isHoliday, getHolidayName, initHolidays } from '../../lib/holidays';
+import { isHoliday, getHolidayName, initHolidays } from '../../lib/holidays';
 import '../../styles/calendars.css';
 
 const DAY_CHECKERS = [isSunday, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday];
@@ -86,7 +86,6 @@ export default function CalendarPage() {
         });
       }
     }
-    result.push(...getHolidayEvents());
     return result;
   };
 

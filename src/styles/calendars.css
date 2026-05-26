@@ -357,7 +357,11 @@
 /* 공휴일/일요일: 빨간색 숫자 */
 .fc-day-holiday .fc-daygrid-day-number {
   color: #ef4444 !important;
-  font-weight: 600;
+}
+
+/* 공휴일 이름: 옅은 빨간색 */
+.fc-day-holiday .fc-holiday-name {
+  color: #f87171 !important;
 }
 
 /* 토요일: 파란색 숫자 */
