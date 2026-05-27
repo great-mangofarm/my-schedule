@@ -42,10 +42,10 @@ export default function EventModal({ open, onClose, onSave, initialDate, editEve
     if (!title.trim()) return;
     if (type !== 'recurring' && !date) return;
 
-    const base = { title: title.trim(), type, time: time || undefined, hasAlarm };
+    const base = { title: title.trim(), type, hasAlarm, ...(time && { time }) };
 
     if (type === 'recurring') {
-      onSave({ ...base, repeatPattern, repeatDays: repeatPattern === 'custom' ? repeatDays : undefined });
+      onSave({ ...base, repeatPattern, ...(repeatPattern === 'custom' && { repeatDays }) });
     } else {
       onSave({ ...base, date });
     }

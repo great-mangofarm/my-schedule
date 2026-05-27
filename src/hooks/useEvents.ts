@@ -19,8 +19,13 @@ export function useEvents() {
     });
   }, []);
 
-  const addEvent = (data: Omit<ScheduleEvent, 'id' | 'createdAt'>) =>
-    addDoc(collection(db, EVENTS_COL), { ...data, createdAt: Timestamp.now().toMillis() });
+  const addEvent = (data: Omit<ScheduleEvent, 'id' | 'createdAt'>) => {
+    const payload = Object.fromEntries(
+      Object.entries({ ...data, createdAt: Timestamp.now().toMillis() })
+        .filter(([, v]) => v !== undefined),
+    );
+    return addDoc(collection(db, EVENTS_COL), payload);
+  };
 
   const updateEvent = (id: string, data: Partial<ScheduleEvent>) =>
     updateDoc(doc(db, EVENTS_COL, id), data);
