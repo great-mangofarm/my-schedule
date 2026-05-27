@@ -14,10 +14,11 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  const { title, body, icon } = payload.notification ?? {};
-  self.registration.showNotification(title ?? 'My Schedule', {
-    body: body ?? '',
-    icon: icon ?? '/icons/icon-192.png',
+  const title = payload.data?.title ?? 'My Schedule';
+  const body  = payload.data?.body  ?? '';
+  self.registration.showNotification(title, {
+    body,
+    icon: '/icons/icon-192.png',
     badge: '/icons/icon-192.png',
   });
 });
