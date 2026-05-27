@@ -46,7 +46,7 @@ export async function initMessaging(): Promise<void> {
       }
     });
   } catch (err) {
-    console.error('[FCM] 초기화 실패 상세:', err);
-    console.error('[FCM] VAPID_KEY 존재:', !!VAPID_KEY);
+    const msg = err instanceof Error ? err.message : String(err);
+    alert('[FCM 오류] ' + msg + '\nVAPID: ' + (VAPID_KEY ? '있음' : '없음'));
   }
 }
