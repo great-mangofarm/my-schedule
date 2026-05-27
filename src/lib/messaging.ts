@@ -15,8 +15,10 @@ export async function initMessaging(): Promise<void> {
   if (permission !== 'granted') return;
 
   try {
-    // 서비스워커 등록 (이미 등록됐으면 기존 것 반환)
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+    // 서비스워커 등록 후 active 상태까지 대기
+    await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+    const registration = await navigator.serviceWorker.ready;
+
     const messaging = getMessaging(app);
 
     const token = await getToken(messaging, {
@@ -44,6 +46,7 @@ export async function initMessaging(): Promise<void> {
       }
     });
   } catch (err) {
-    console.error('[FCM] 초기화 실패:', err);
+    console.error('[FCM] 초기화 실패 상세:', err);
+    console.error('[FCM] VAPID_KEY 존재:', !!VAPID_KEY);
   }
 }
