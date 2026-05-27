@@ -52,10 +52,18 @@ export default function CalendarPage() {
 
   // 마운트 후 FullCalendar 크기 재계산 (모바일 초기 레이아웃 깨짐 방지)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      calendarRef.current?.getApi().updateSize();
-    }, 100);
-    return () => clearTimeout(timer);
+    const update = () => calendarRef.current?.getApi().updateSize();
+    // 여러 타이밍에 재시도 — 모바일은 CSS 렌더링이 늦을 수 있음
+    const t1 = setTimeout(update, 50);
+    const t2 = setTimeout(update, 300);
+    const t3 = setTimeout(update, 800);
+    window.addEventListener('resize', update);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      window.removeEventListener('resize', update);
+    };
   }, []);
 
   const buildFcEvents = (): EventInput[] => {
