@@ -29,11 +29,13 @@ async function getAccessToken(env: Env): Promise<string> {
 
   const signingInput = `${b64url(header)}.${b64url(claim)}`;
 
-  // PEM → ArrayBuffer
-  const pem = env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+  // PEM → ArrayBuffer (literal \n 또는 실제 개행 모두 처리)
+  const pem = env.FIREBASE_PRIVATE_KEY
+    .replace(/\\n/g, '\n')   // JSON 이스케이프된 \n → 실제 개행
+    .replace(/\r/g, '');     // Windows 개행 제거
   const pemBody = pem
-    .replace('-----BEGIN PRIVATE KEY-----', '')
-    .replace('-----END PRIVATE KEY-----', '')
+    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+    .replace(/-----END PRIVATE KEY-----/g, '')
     .replace(/\s/g, '');
   const keyBytes = Uint8Array.from(atob(pemBody), (c) => c.charCodeAt(0));
 
@@ -71,7 +73,17 @@ async function getAccessToken(env: Env): Promise<string> {
 // ─── 메인 로직 ────────────────────────────────────────────────────────────────
 
 export default {
-  async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext) {
+  async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext): Promise<void> {
+    try {
+      await run(env);
+    } catch (e) {
+      console.error('[Worker] 최상위 오류:', e instanceof Error ? e.message : String(e));
+      throw e;
+    }
+  },
+};
+
+async function run(env: Env): Promise<void> {
     // KST 현재 시각
     const kst = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
     const hh = String(kst.getHours()).padStart(2, '0');
@@ -190,5 +202,4 @@ export default {
         fetch(`${base}/fcmTokens/${t}`, { method: 'DELETE', headers }),
       ),
     );
-  },
-};
+}
