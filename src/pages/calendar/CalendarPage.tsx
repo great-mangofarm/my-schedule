@@ -50,6 +50,14 @@ export default function CalendarPage() {
     initHolidays().then(() => setHolidaysReady(true));
   }, []);
 
+  // 마운트 후 FullCalendar 크기 재계산 (모바일 초기 레이아웃 깨짐 방지)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      calendarRef.current?.getApi().updateSize();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   const buildFcEvents = (): EventInput[] => {
     const result: EventInput[] = [];
     const today = new Date();
