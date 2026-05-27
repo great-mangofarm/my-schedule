@@ -5,5 +5,4 @@ dist
 .firebase
 *.log
 .DS_Store
-functions/lib
-functions/node_modules
+cloudflare-worker/node_modules

@@ -1,0 +1,6 @@
+name = "my-schedule-alarms"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[triggers]
+crons = ["* * * * *"]  # 매 1분마다 실행 (KST 기준 타임존은 코드에서 처리)
