@@ -15,7 +15,8 @@ export async function initMessaging(): Promise<void> {
   if (permission !== 'granted') return;
 
   try {
-    const registration = await navigator.serviceWorker.ready;
+    // 서비스워커 등록 (이미 등록됐으면 기존 것 반환)
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
     const messaging = getMessaging(app);
 
     const token = await getToken(messaging, {
