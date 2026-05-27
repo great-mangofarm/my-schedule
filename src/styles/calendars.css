@@ -368,10 +368,13 @@
 /* 공휴일 이름 텍스트 */
 .fc-holiday-name {
   font-size: 10px;
-  color: #ef4444;
-  line-height: 1.2;
-  padding: 0 10px 4px;
+  color: #f87171;
+  line-height: 1;
+  padding: 0 10px;
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 날짜 셀 hover + pointer */

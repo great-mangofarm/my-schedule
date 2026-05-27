@@ -3,13 +3,13 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import type { EventInput, DateSelectArg, EventClickArg, DayCellContentArg } from '@fullcalendar/core';
+import type { EventInput, DateSelectArg, EventClickArg, DayCellContentArg, DayCellMountArg } from '@fullcalendar/core';
 import { format, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday } from 'date-fns';
 import AppLayout from '../../components/layout/AppLayout';
 import EventModal from '../../components/EventModal';
 import { useEvents, useCheckIns } from '../../hooks/useEvents';
 import type { ScheduleEvent } from '../../types/schedule';
-import { getHolidayEvents, isHoliday, getHolidayName, initHolidays } from '../../lib/holidays';
+import { isHoliday, getHolidayName, initHolidays } from '../../lib/holidays';
 import '../../styles/calendars.css';
 
 const DAY_CHECKERS = [isSunday, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday];
@@ -86,7 +86,6 @@ export default function CalendarPage() {
         });
       }
     }
-    result.push(...getHolidayEvents());
     return result;
   };
 
@@ -98,15 +97,17 @@ export default function CalendarPage() {
     return [];
   };
 
-  const renderDayCellContent = (arg: DayCellContentArg) => {
+  const handleDayCellDidMount = (arg: DayCellMountArg) => {
     const dateStr = format(arg.date, 'yyyy-MM-dd');
     const holidayName = getHolidayName(dateStr);
-    return (
-      <>
-        <span className="fc-daygrid-day-number">{arg.dayNumberText}</span>
-        {holidayName && <span className="fc-holiday-name">{holidayName}</span>}
-      </>
-    );
+    if (!holidayName) return;
+    const frame = arg.el.querySelector('.fc-daygrid-day-frame');
+    if (!frame) return;
+    if (frame.querySelector('.fc-holiday-name')) return;
+    const label = document.createElement('div');
+    label.className = 'fc-holiday-name';
+    label.textContent = holidayName;
+    frame.insertBefore(label, frame.querySelector('.fc-daygrid-day-events'));
   };
 
   const handleEventClick = (info: EventClickArg) => {
@@ -147,7 +148,7 @@ export default function CalendarPage() {
             }}
             events={buildFcEvents()}
             dayCellClassNames={getDayCellClass}
-            dayCellContent={renderDayCellContent}
+            dayCellDidMount={handleDayCellDidMount}
             selectable
             selectMirror
             select={handleDateSelect}
