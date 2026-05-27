@@ -57,9 +57,49 @@
 }
 
 @media (max-width: 767px) {
-  .fc-toolbar {
-    flex-direction: column;
-    gap: 16px;
+  .fc .fc-toolbar.fc-header-toolbar {
+    padding: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .fc-toolbar-title {
+    font-size: 15px !important;
+  }
+  .fc-addEventButton-button.fc-button-primary {
+    height: 36px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  .fc-toolbar-chunk:first-child
+    .fc-button-group
+    .fc-prev-button.fc-button-primary,
+  .fc-toolbar-chunk:first-child
+    .fc-button-group
+    .fc-next-button.fc-button-primary {
+    width: 36px;
+    height: 36px;
+  }
+  .fc .fc-toolbar-chunk:last-child .fc-button-group {
+    height: 34px;
+  }
+  .fc .fc-toolbar-chunk:last-child .fc-button-primary {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .fc .fc-day {
+    padding: 4px !important;
+    font-size: 13px;
+  }
+  .fc .fc-daygrid-day-number {
+    padding: 4px 6px !important;
+  }
+  .fc-holiday-name {
+    font-size: 9px;
+    padding: 0 4px;
+  }
+  .custom-calendar .fc-theme-standard .fc-col-header-cell {
+    padding: 8px 4px !important;
+    font-size: 12px;
   }
 }
 
